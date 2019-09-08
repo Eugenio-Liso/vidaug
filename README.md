@@ -13,16 +13,10 @@ It converts input videos into a new, much larger set of slightly altered videos.
 
 ## Requirements and installation
 
-Required packages:
-* numpy
-* PIL
-* scipy
-* skimage
-* OpenCV (i.e. `cv2`)
-
-For installation, simply use `sudo pip install git+https://github.com/okankop/vidaug`.
-Alternatively, the repository can be download via `git clone https://github.com/okankop/vidaug` and installed by using `python setup.py sdist && pip install dist/vidaug-0.1.tar.gz`.
-
+```bash
+conda install opencv=3.4.4 scikit-image=0.14.3 -c conda-forge
+conda install scikit-learn=0.21.2 pillow=6.1.0 scikit-image=0.15.0 scipy=1.1.0 
+```
 
 ## Examples
 

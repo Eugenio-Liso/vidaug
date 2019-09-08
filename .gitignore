@@ -9,3 +9,7 @@
 
 #Exclude same private files
 main2.py
+
+vidaug.egg-info/
+dist/
+.idea/
