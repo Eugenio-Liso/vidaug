@@ -14,6 +14,7 @@ List of augmenters:
     * OneOf
     * SomeOf
     * Sometimes
+    * AllOf
 
 """
 
@@ -48,6 +49,24 @@ class Sequential(object):
 
         return clip
 
+class AllOf(object):
+    """
+    Selects all the augmentations from a list and apply then one at a time.
+
+    Args:
+        transforms (list of "Augmentor" objects): The list of augmentations to compose.
+    """
+
+    def __init__(self, transforms):
+        self.transforms = transforms
+
+    def __call__(self, clip):
+        output_clips = []
+        for t in self.transforms:
+            output_clip_of_t = t(clip)
+            output_clips.append(output_clip_of_t)
+
+        return output_clips
 
 class OneOf(object):
     """

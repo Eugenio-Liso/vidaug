@@ -44,6 +44,9 @@ class GaussianBlur(object):
             raise TypeError('Expected numpy.ndarray or PIL.Image' +
                             'but got list of {0}'.format(type(clip[0])))
 
+    def __str__(self):
+        return "GaussianBlur"
+
 
 class ElasticTransformation(object):
     """
@@ -134,6 +137,9 @@ class ElasticTransformation(object):
             remapped = remapped_flat.reshape((height, width))
             result[..., c] = remapped
         return result
+
+    def __str__(self):
+        return "ElasticTransformation"
 
 
 
