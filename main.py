@@ -5,7 +5,7 @@ import os
 import argparse
 from pathlib import Path
 import random
-from multiprocessing.dummy import Pool as ThreadPool
+from multiprocessing import Pool as ThreadPool
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--frames_dir_path', default=None, type=Path, help='Directory path of the video frames produced by '
@@ -57,6 +57,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     random.seed(args.seed)
+    parallelization = args.jobs
 
     # Filters that makes sense
     allFilters = va.AllOf(
@@ -84,27 +85,43 @@ if __name__ == '__main__':
         for video_name in video_names:
             video_path = os.path.join(target_class_path, video_name)
 
-            frames = load_frames(video_path)
-            augmented_frames = allFilters(frames)
+            filters_to_actually_calculate = []
+            for filterIdx, augFilter in enumerate(allFilters.transforms):
+                output_path = os.path.join(output_augmented_path, target_class, video_name, str(augFilter))
 
-            idx = 0
-            while idx < len(augmented_frames):
-                filter_name = str(allFilters.transforms[idx])
-                augmented_frames_for_filter = augmented_frames[idx]
-
-                output_path = os.path.join(output_augmented_path, target_class, video_name, filter_name)
                 if os.path.exists(output_path):
                     print("Path {} already exists. Skipping...".format(output_path))
                 else:
-                    os.makedirs(output_path, 0o755)
+                    filters_to_actually_calculate.append(augFilter)
 
-                    print("Writing augmented frames in directory {}".format(output_path))
+            localFilters = va.AllOf(filters_to_actually_calculate)
 
-                    for frame_idx, augmented_frame in enumerate(augmented_frames_for_filter):
-                        output_image = Image.fromarray(augmented_frame)
-                        output_image.save(os.path.join(output_path, "image_{}.jpg".format(str(frame_idx).zfill(5))))
+            if not localFilters.transforms:
+                print("No filters to apply")
+            else:
+                frames = load_frames(video_path)
+                pool = ThreadPool(parallelization)
+                augmented_frames = pool.map(localFilters, [frames])[0]
 
-                idx += 1
+                idx = 0
+                while idx < len(augmented_frames):
+                    filter_name = str(localFilters.transforms[idx])
+                    augmented_frames_for_filter = augmented_frames[idx]
+
+                    output_path = os.path.join(output_augmented_path, target_class, video_name, filter_name)
+                    if os.path.exists(output_path):
+                        print("Path {} already exists. Skipping...".format(output_path))
+                    else:
+                        os.makedirs(output_path, 0o755)
+
+                        print("Writing augmented frames in directory {}".format(output_path))
+
+                        for frame_idx, augmented_frame in enumerate(augmented_frames_for_filter):
+                            output_image = Image.fromarray(augmented_frame)
+                            output_image.save(os.path.join(output_path, "image_{}.jpg".format(str(frame_idx).zfill(5))))
+
+                    idx += 1
+
 
     # loaded_video = load_frames("/mnt/external-drive/datasets/hollywood2/Hollywood2/frames/running/actioncliptest00005/")
     # augmented_frames = seq(loaded_video)
