@@ -64,28 +64,26 @@ class RandomResize(object):
     Resize video bysoomingin and out.
 
     Args:
-        rate (float): Video is scaled uniformly between
-        [1 - rate, 1 + rate].
+        scaling_factor = determines how to scale the image
 
         interp (string): Interpolation to use for re-sizing
         ('nearest', 'lanczos', 'bilinear', 'bicubic' or 'cubic').
     """
 
-    def __init__(self, rate=0.0, interp='bilinear'):
-        self.rate = rate
+    def __init__(self, scaling_factor=1.0, interp='bilinear'):
+        self.scaling_factor = scaling_factor
 
         self.interpolation = interp
 
     def __call__(self, clip):
-        scaling_factor = random.uniform(1 - self.rate, 1 + self.rate)
 
         if isinstance(clip[0], np.ndarray):
             im_h, im_w, im_c = clip[0].shape
         elif isinstance(clip[0], PIL.Image.Image):
             im_w, im_h = clip[0].size
 
-        new_w = int(im_w * scaling_factor)
-        new_h = int(im_h * scaling_factor)
+        new_w = int(im_w * self.scaling_factor)
+        new_h = int(im_h * self.scaling_factor)
         new_size = (new_h, new_w)
         if isinstance(clip[0], np.ndarray):
             return [scipy.misc.imresize(img, size=(new_h, new_w),interp=self.interpolation) for img in clip]
@@ -107,6 +105,8 @@ class RandomResize(object):
         elif interp == 'cubic':
             return PIL.Image.CUBIC
 
+    def __str__(self):
+        return "RandomResize"
 
 class RandomTranslate(object):
     """
