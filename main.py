@@ -5,7 +5,6 @@ import os
 import argparse
 from pathlib import Path
 import random
-from multiprocessing import Pool as ThreadPool
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--frames_dir_path', default=None, type=Path, help='Directory path of the video frames produced by '
@@ -16,9 +15,6 @@ parser.add_argument('--output_augmented_path', default=None, type=Path,
 
 parser.add_argument('--seed', default=5, type=int,
                     help='Seed for "random" filters')
-
-parser.add_argument('--jobs', default=8, type=int,
-                    help='Parallelization unit')
 
 
 def load_frames(path):
@@ -57,7 +53,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     random.seed(args.seed)
-    parallelization = args.jobs
 
     # Filters that makes sense
     allFilters = va.AllOf(
@@ -100,8 +95,7 @@ if __name__ == '__main__':
                 print("No filters to apply")
             else:
                 frames = load_frames(video_path)
-                pool = ThreadPool(parallelization)
-                augmented_frames = pool.map(localFilters, [frames])[0]
+                augmented_frames = localFilters(frames)
 
                 idx = 0
                 while idx < len(augmented_frames):
