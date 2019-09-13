@@ -1,10 +1,12 @@
-from vidaug import augmentors as va
+import argparse
+import os
+import random
+from pathlib import Path
+
 import cv2 as cv
 from PIL import Image, ImageSequence
-import os
-import argparse
-from pathlib import Path
-import random
+
+from vidaug import augmentors as va
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--frames_dir_path', default=None, type=Path, help='Directory path of the video frames produced by '
@@ -72,6 +74,7 @@ if __name__ == '__main__':
     output_augmented_path = args.output_augmented_path
 
     target_classes = os.listdir(frames_dir_path)
+    existing_videos = []
 
     for target_class in target_classes:
         target_class_path = os.path.join(frames_dir_path, target_class)
@@ -102,7 +105,23 @@ if __name__ == '__main__':
                     filter_name = str(localFilters.transforms[idx])
                     augmented_frames_for_filter = augmented_frames[idx]
 
-                    output_path = os.path.join(output_augmented_path, target_class, video_name, filter_name)
+                    num_of_dots = video_name.count('.')
+                    class_dir_path = os.path.join(output_augmented_path, target_class)
+
+                    if num_of_dots > 0:
+                        print("Video name {} with at least one dot. Substituting it with _".format(
+                            video_name))
+
+                        new_video_name = video_name.replace('.', '_')
+                        video_name = new_video_name
+
+                    if video_name in existing_videos:
+                        raise Exception("Duplicate video name {}. Please rename it.".format(video_name))
+
+                    final_output_video_name = f"{video_name}_{filter_name}"
+                    existing_videos.append(final_output_video_name)
+
+                    output_path = os.path.join(class_dir_path, final_output_video_name)
                     if os.path.exists(output_path):
                         print("Path {} already exists. Skipping...".format(output_path))
                     else:
@@ -115,7 +134,6 @@ if __name__ == '__main__':
                             output_image.save(os.path.join(output_path, "image_{}.jpg".format(str(frame_idx).zfill(5))))
 
                     idx += 1
-
 
     # loaded_video = load_frames("/mnt/external-drive/datasets/hollywood2/Hollywood2/frames/running/actioncliptest00005/")
     # augmented_frames = seq(loaded_video)
