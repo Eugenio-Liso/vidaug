@@ -59,7 +59,7 @@ if __name__ == '__main__':
     # Filters that makes sense
     allFilters = va.AllOf(
         [
-            va.RandomResize(scaling_factor=1.1),
+            # va.RandomResize(scaling_factor=1.1),
             va.HorizontalFlip(),
             va.GaussianBlur(sigma=1),
             va.ElasticTransformation(),
