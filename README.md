@@ -14,8 +14,9 @@ It converts input videos into a new, much larger set of slightly altered videos.
 ## Requirements and installation
 
 ```bash
-conda install opencv=3.4.4 scikit-image=0.14.3 -c conda-forge
-conda install scikit-learn=0.21.2 pillow=6.1.0 scikit-image=0.15.0 scipy=1.1.0 
+conda install scikit-learn=0.21.2 pillow=6.1.0 scikit-image=0.15.0 scipy=1.1.0
+conda install pip
+pip install opencv-python==3.4.5.20
 ```
 
 ## Examples
